@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOCOPILOT</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+    <img src="./image/loading.gif" alt="load" class="loading-1">
+    <img src="./image/loading.gif" alt="load" class="loading-2">
+
+    <div class="filemanager close">
+        <div class="close"></div>
+        <div class="filecontainer">
+            <div class="file-item-add"></div>
+        </div>
+    </div>
+    <div class="page-header">
+        <input class="page-name" value="">
+        <div class="saving-box">enregistré</div>
+        <div class="page-btn">
+            <button class="backup">Voir le QRcode</button>
+            <div class="qrcode"></div>
+        </div>
+    </div>
+    <div class="page">
+        <div class="page-content" contenteditable="true"></div>
+    </div>
+    <div class="page-footer"></div>
+
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
+    <script src="./js/dom-to-image.min.js"></script>
+    <script src="./js/script.js"></script>
+</body>
+
+</html>

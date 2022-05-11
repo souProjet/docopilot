@@ -1,0 +1,384 @@
+body {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.filemanager {
+    position: absolute;
+    height: 100%;
+    width: 15%;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    z-index: 99;
+    background-color: rgb(247, 246, 243);
+    flex-wrap: nowrap;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    transform: translateX(0);
+    transition: all 0.5s ease-in-out;
+}
+
+@media(max-width:767px) {
+    .filemanager {
+        width: 100%;
+    }
+    .page-header .page-name {
+        width: 100px !important;
+    }
+}
+
+@media(min-width:768px) {
+    .filemanager {
+        width: 35%;
+    }
+}
+
+@media(min-width:992px) {
+    .filemanager {
+        width: 25%;
+    }
+}
+
+@media(min-width:1200px) {
+    .filemanager {
+        width: 15%;
+    }
+}
+
+.filecontainer {
+    position: absolute;
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    align-content: center;
+    justify-content: flex-start;
+}
+
+.filemanager .filecontainer .file-item,
+.filemanager .filecontainer .file-item-add {
+    position: relative;
+    height: 230px;
+    width: 170px;
+    margin: 30px;
+    border-radius: 15px;
+    background-color: #fafafa;
+    z-index: 50;
+    cursor: pointer;
+    background-size: 200%;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: all 0.3s ease-in-out;
+}
+
+.filemanager .filecontainer .file-item {
+    padding: 5px;
+    text-align: center;
+}
+
+.filemanager .filecontainer .file-item-add {
+    background-size: 60%;
+    filter: blur(1px);
+    background-image: url("http://localhost:3000/image/add.png");
+}
+
+.filemanager .filecontainer .file-item-add:hover {
+    filter: blur(0px);
+    background-size: 70%;
+    transition: all 0.3s ease-in-out;
+}
+
+.filemanager .filecontainer .file-item:hover {
+    background-size: 190%;
+    transition: all 0.3s ease-in-out;
+}
+
+.filemanager .filecontainer .file-item .trash {
+    height: 30px;
+    width: 30px;
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    cursor: pointer;
+    transition: all 0.1s ease-in;
+}
+
+.filemanager .filecontainer .file-item .trash:hover {
+    cursor: pointer;
+    transform: rotate(10deg);
+    transition: all 0.1s ease-in;
+}
+
+.filemanager .close {
+    position: absolute;
+    height: 30px;
+    width: 30px;
+    top: 10px;
+    right: 10px;
+    z-index: 70;
+    background-image: url("http://localhost:3000/image/rightarrow.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+}
+
+.filemanager.close {
+    transform: translateX(-80%);
+    transition: all 0.5s ease-in-out;
+}
+
+.page {
+    overflow-y: scroll;
+    position: absolute;
+    height: calc(100% - 40px - 20px);
+    width: 100%;
+    top: 40px;
+    left: 0;
+    z-index: 10;
+    background-color: #fafafa;
+    opacity: 0;
+    transition: all 0.5s ease-in-out;
+}
+
+.page .page-content {
+    position: absolute;
+    width: 50%;
+    right: 17.5%;
+    top: 10%;
+    height: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    caret-color: rgb(55, 53, 47);
+    padding: 20px;
+    font-size: 20px;
+}
+
+.page .page-content.incompletion::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-image: url("http://localhost:3000/image/loading.gif");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.page .page-content>* {
+    background-color: inherit !important;
+}
+
+.page .page-content:focus {
+    outline: none;
+    border: none;
+}
+
+.page-header {
+    background-color: #fafafa;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: calc(100% - 15%);
+    min-width: calc(100% - 40%);
+    height: 40px;
+    width: 85%;
+    position: fixed;
+    top: 0;
+    opacity: 0;
+    right: 0;
+    transition: all 0.5s ease-in-out;
+    z-index: 20;
+}
+
+.page-header .page-name,
+.page-header .page-btn .backup,
+.page-header .page-btn .share {
+    padding: 10px 15px;
+    box-shadow: none;
+    border: none;
+    height: 40px;
+    font-weight: 600;
+    margin-left: 30px;
+    font-size: 15px;
+    background-color: inherit;
+}
+
+.page-header .page-name:focus,
+.page-header .page-btn .backup:focus,
+.page-header .page-btn .share:focus {
+    outline: none;
+    border: none;
+}
+
+.page-header .page-btn .backup,
+.page-header .page-btn .share {
+    cursor: pointer;
+    margin: 0;
+    transition: all 0.1s ease-in;
+}
+
+.page-header .page-btn .qrcode {
+    position: absolute;
+    font-size: 20px;
+    opacity: 0;
+    height: 128px;
+    width: 128px;
+    right: 10px;
+    transition: all 0.5s ease-in-out;
+}
+
+.page-header .page-btn .qrcode.active {
+    opacity: 1;
+    transition: all 0.5s ease-in-out;
+}
+
+.page-header .page-btn .backup:hover,
+.page-header .page-btn .share:hover {
+    background-color: rgba(55, 53, 47, 0.08);
+    transition: all 0.1s ease-in;
+}
+
+.page-header .saving-box {
+    font-size: 15px;
+    text-align: center;
+    opacity: .7;
+    display: flex;
+    color: green;
+    vertical-align: middle;
+}
+
+.page-header .saving-box img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.page-footer {
+    background-color: #fafafa;
+    max-width: calc(100% - 15%);
+    min-width: calc(100% - 40%);
+    height: 20px;
+    position: fixed;
+    bottom: 0;
+    width: 85%;
+    right: 0;
+    transition: all 0.5s ease-in-out;
+    opacity: 0;
+    z-index: 20;
+}
+
+.page::-webkit-scrollbar,
+.filemanager::-webkit-scrollbar {
+    width: 8px;
+}
+
+.page::-webkit-scrollbar-track,
+.filemanager::-webkit-scrollbar-track {
+    background: lightgray;
+}
+
+.page::-webkit-scrollbar-thumb,
+.filemanager::-webkit-scrollbar-thumb {
+    background-color: #00ced1;
+    border-radius: 20px;
+    border: 3px solid #00ced1;
+}
+
+.context-menu,
+.shortcut-menu {
+    position: absolute;
+    z-index: 100;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgb(53 71 90 / 20%);
+}
+
+.context-menu::before,
+.shortcut-menu::before {
+    content: "";
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    background-color: white;
+    top: -5px;
+    left: 50px;
+    z-index: -1;
+    transform: rotate(45deg);
+}
+
+.context-menu .context-menu-item,
+.shortcut-menu .shortcut-menu-item {
+    padding: 14px;
+    cursor: pointer;
+    font-size: 22px;
+    transition: all .2s ease-in-out;
+}
+
+.context-menu .context-menu-item:hover,
+.shortcut-menu .shortcut-menu-item:hover {
+    background-color: rgb(248, 242, 242);
+    transition: all .2s ease-in-out;
+}
+
+.loading-1,
+.loading-2 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 70px;
+    height: 70px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    z-index: 100;
+    margin: auto;
+}
+
+.loading-1 {
+    top: 40%;
+    left: 7%;
+    width: 40px;
+    height: 40px;
+    transform: translate(-50%, -50%);
+}
+
+.loading-2 {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.completion-box {
+    opacity: .4;
+}
+
+.simplify-text,
+.rephrase-text,
+.translate-text {
+    color: #74da7c;
+}
+
+.simplify-text::after,
+.rephrase-text::after,
+.translate-text::after {
+    content: "";
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    background-image: url("http://localhost:3000/image/loading.gif");
+    background-size: cover;
+}
+
+.backup-code-input {
+    position: absolute;
+    border: none;
+    transform: translateX(-50%);
+    outline: none;
+    left: 50%;
+    border-bottom: solid 2px black;
+}
