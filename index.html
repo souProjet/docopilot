@@ -7,6 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOCOPILOT</title>
     <link rel="stylesheet" href="./css/style.css">
+    <link rel="shortcut icon" href="./image/logo2.png" type="image/x-icon">
+    <meta name="description" content="Générez du texte automatiquement et accéder à plein d'autres outils de génération de texte.">
+    <meta property="og:title" content="DOCOPILOT - It's Just Magic">
+    <meta property="og:description" content="Générez du texte automatiquement et accéder à plein d'autres outils de génération de texte.">
+    <meta property="og:image" content="https://docopilot.divertixme.com/image/logo2.png">
+    <meta property="og:url" content="https://docopilot.divertixme.com">
 </head>
 
 <body>
@@ -24,13 +30,17 @@
         <div class="saving-box">enregistré</div>
         <div class="page-btn">
             <button class="backup">Voir le QRcode</button>
-            <div class="qrcode"></div>
         </div>
     </div>
+    <div class="qrcode"></div>
     <div class="page">
         <div class="page-content" contenteditable="true"></div>
     </div>
-    <div class="page-footer"></div>
+    <div class="page-footer">
+        <span class="nbr-chars">0 caractère</span>
+        <span class="logo"><img src="./image/logo1.png" alt="logo"></span>
+        <span class="nbr-word">0 mot</span>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@gh-pages/qrcode.min.js"></script>
     <script src="./js/dom-to-image.min.js"></script>

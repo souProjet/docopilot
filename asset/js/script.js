@@ -12,14 +12,21 @@ let savingBox = document.querySelector('.page-header .saving-box');
 let shareBtn = document.querySelector('.page-header .page-btn .share');
 let backupBtn = document.querySelector('.page-header .page-btn .backup');
 let closeFileManager = document.querySelector('.filemanager .close');
+let nbrChars = document.querySelector('.nbr-chars');
+let nbrWord = document.querySelector('.nbr-word');
 
 let token = localStorage.getItem('token');
 let shareToken = localStorage.getItem('share-token');
 let fileToken = localStorage.getItem('file-token');
+let fileManagerOpen = parseInt(localStorage.getItem('filemanager-state'));
 let first = false;
 let issave = false;
 let timeout, timeout2, timeout3 = null;
-let charPos = 0;
+let charPos = pageContent.innerHTML.length;
+let isMobile = false;
+if (window.matchMedia("(max-width:767px)").matches) {
+    isMobile = true;
+}
 
 if (window.location.search.split("=")[1]) {
     localStorage.setItem('token', window.location.search.split("=")[1]);
@@ -122,6 +129,9 @@ function rephrase() {
 
 
 document.addEventListener('DOMContentLoaded', async() => {
+
+    !fileManagerOpen ? (!isMobile ? localStorage.setItem('filemanager-state', 1) : localStorage.setItem('filemanager-state', 0)) : fileManagerOpen;
+
     if (!token) {
         let input = document.createElement('input');
         input.classList.add('backup-code-input');
@@ -133,7 +143,8 @@ document.addEventListener('DOMContentLoaded', async() => {
             }
         });
         localStorage.setItem('token', genToken(10));
-        // localStorage.setItem('share-token', genToken(10));
+        fileManagerOpen = localStorage.getItem('filemanager-state');
+
         token = localStorage.getItem('token');
         shareToken = localStorage.getItem('share-token');
         first = true;
@@ -142,31 +153,25 @@ document.addEventListener('DOMContentLoaded', async() => {
             pageContent.innerHTML = `<span class="placeholder" style="opacity:.3;">Bonjour et bienvenu sur docopilot, votre éditeur de texte intelligent capable de prédire ce que vous aller écrire.<br><br>Faite un clique droit sur le texte séléctionné pour voir toutes les options.</span>`;
         }, 1000);
 
-        // fetch(`http://localhost:3000/linksharetoken`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'Authorization': `Bearer ${token}`
-        //     },
-        //     body: JSON.stringify({
-        //         shareToken: shareToken
-        //     })
-        // }).then(res => res.json()).then(res => {
-        //     if (res.error) {
-        //         console.log(res.error);
-        //     } else {
-        //         console.log(res);
-        //     }
-        // });
-
     } else {
         pageContent.focus();
+    }
+    if (fileManagerOpen) {
+        fileManager.classList.remove('close')
+        closeFileManager.style.backgroundImage = "url('http://localhost:3000/image/close.png')";
+        pageHeader.classList.remove('active')
+        pageFooter.classList.remove('active')
+    } else {
+        fileManager.classList.add('close')
+        closeFileManager.style.backgroundImage = "url('http://localhost:3000/image/rightarrow.png')";
+        pageHeader.classList.add('active')
+        pageFooter.classList.add('active')
     }
     document.querySelector('.qrcode').innerHTML = "Votre code : " + token;
     var qrcode = new QRCode(document.querySelector('.qrcode'), {
         text: "http://localhost:3000/?token=" + token,
-        width: 128,
-        height: 128,
+        width: 256,
+        height: 256,
         colorDark: "#000000",
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.H
@@ -345,8 +350,10 @@ document.addEventListener('DOMContentLoaded', async() => {
             fileManager.style.opacity = "1";
             loader1.style.opacity = "0";
             loader1.style.display = "none";
+            updateCounter();
         }, 200);
     }, 300)
+
 });
 
 
@@ -360,6 +367,21 @@ function getSelectionText() {
     }
     return text;
 
+}
+
+function validateCompletion() {
+    if (document.querySelector('.completion-box')) {
+        let completionContent = document.querySelector('.completion-box').innerHTML.trim();
+        document.querySelectorAll('.completion-box').forEach(e => e.remove());
+        pageContent.innerHTML += completionContent;
+        charPos = pageContent.innerHTML.length;
+        try {
+            setCursor(charPos, pageContent);
+        } catch (e) {}
+        saveFile();
+        leaveContextMenu();
+
+    }
 }
 
 function setCursor(pos, target) {
@@ -412,26 +434,26 @@ pageName.addEventListener('input', () => {
 
 page.addEventListener('click', () => pageContent.focus());
 
-
 pageContent.addEventListener('keyup', async(e) => {
     savingBox.style.color = "black";
     savingBox.innerHTML = '<img src="./image/loading.gif">enregistrement';
-    pageContent.innerHTML.replaceAll('<br>', '\n');
+    if (e.key == "Enter") {
+        pageContent.innerHTML = pageContent.innerHTML.replaceAll(/\<div\> \<\/div\>/g, "\n")
 
-    if (e.key == "Alt") {
-        e.preventDefault();
-        leaveContextMenu();
-        if (document.querySelector('.completion-box')) {
-            let completionContent = document.querySelector('.completion-box').innerHTML;
-            document.querySelectorAll('.completion-box').forEach(e => e.remove());
-            pageContent.innerHTML += completionContent;
-            charPos = pageContent.innerHTML.length;
+        pageContent.innerHTML += "\n"
+        pageContent.innerHTML = pageContent.innerHTML.replaceAll(/\<div\>\<br\>\<\/div\>/g, "\n")
+        pageContent.innerHTML = pageContent.innerHTML.replaceAll(/\<\/?br ?\/?\>/g, "\n")
+        charPos = pageContent.innerHTML.length;
+        try {
             setCursor(charPos, pageContent);
-            saveFile();
-        }
+        } catch (e) {}
+        return false;
+    } else if (e.key == "Alt") {
+        validateCompletion();
     }
+    updateCounter();
 
-    document.querySelector('.completion-box') ? document.querySelectorAll('.completion-box').forEach(e => e.remove()) : null;
+    document.querySelectorAll('.completion-box').forEach(e => e.remove());
     pageContent.classList.add('incompletion');
     if (timeout3) { clearTimeout(timeout3); }
     timeout3 = setTimeout(function() {
@@ -449,11 +471,13 @@ pageContent.addEventListener('keyup', async(e) => {
             }).then(res => res.text()).then(data => {
                 charPos = pageContent.innerHTML.length;
                 pageContent.classList.remove('incompletion');
-                pageContent.innerHTML += `<span class="completion-box">${" "+data.trim()}</span>`;
-                setCursor(charPos, pageContent);
+                pageContent.innerHTML += `<span class="completion-box">${" "+data.trim().replaceAll(/\<\/?br ?\/?\>/g, "\n")}</span>`;
+                try {
+                    setCursor(charPos, pageContent);
+                } catch (e) {}
                 let shortcut = document.createElement('div');
                 shortcut.classList.add('shortcut-menu');
-                shortcut.innerHTML = `<div class="shortcut-menu-item">Alt pour valider</div>`;
+                shortcut.innerHTML = `<div class="shortcut-menu-item" onclick="validateCompletion()">Alt pour valider</div>`;
                 shortcut.style.top = pageContent.offsetHeight + pageContent.offsetTop + 'px';
                 shortcut.style.left = pageContent.offsetWidth / 4 + pageContent.offsetLeft + 'px';
                 page.appendChild(shortcut);
@@ -469,15 +493,14 @@ pageContent.addEventListener('keyup', async(e) => {
     }
     timeout = setTimeout(async function() {
         saveFile();
-
-    }, 3000)
+    }, 3000);
 
 });
 document.addEventListener('contextmenu', (e) => {
     e.preventDefault();
 });
 pageContent.addEventListener('contextmenu', (e) => {
-            leaveContextMenu();
+            leaveContextMenu(false);
             e.preventDefault();
             let selection = getSelectionText();
             if (selection) {
@@ -495,25 +518,31 @@ pageContent.addEventListener('contextmenu', (e) => {
 });
 pageContent.addEventListener('focusout', (e) => {
     if (first && pageContent.innerHTML == "") {
-        pageContent.innerHTML = ` < span class = "placeholder"
-        style = "opacity:.3;" > Bonjour et bienvenu sur docopilot, votre éditeur de texte intelligent capable de prédire ce que vous aller écrire. < br > < br > Faite un clique droit sur le texte séléctionné pour voir toutes les options. < /span>`;
+        pageContent.innerHTML = ` <span class = "placeholder" style = "opacity:.3;"> Bonjour et bienvenu sur docopilot, votre éditeur de texte intelligent capable de prédire ce que vous aller écrire. <br><br> Faite un clique droit sur le texte séléctionné pour voir toutes les options. </span>`;
     }
 });
 pageContent.addEventListener('focusin', (e) => {
     document.querySelectorAll('span.placeholder').forEach(e => e.remove());
-    leaveContextMenu()
+    leaveContextMenu(false)
 });
-pageContent.addEventListener('click', (e) => leaveContextMenu());
-pageContent.addEventListener('dbclick', (e) => leaveContextMenu());
+pageContent.addEventListener('click', (e) => leaveContextMenu(false));
+pageContent.addEventListener('dbclick', (e) => leaveContextMenu(false));
 
-function leaveContextMenu() {
-    if (document.querySelector('.context-menu')) {
-        document.querySelector('.context-menu').remove();
+function leaveContextMenu(placeCursor = true) {
+    document.querySelectorAll('.context-menu').forEach(e => e.remove());
+    document.querySelectorAll('.shortcut-menu').forEach(e => e.remove());
+    document.querySelectorAll('.completion-box').forEach(e => e.remove());
+    pageContent.querySelectorAll('div').forEach(e => e.remove());
+    if(placeCursor){
+        pageContent.innerHTML = pageContent.innerHTML.replaceAll(/\<\/?br ?\/?\>/g, "\n")
+        pageContent.innerHTML = pageContent.innerHTML.replaceAll(/\<div\>\<br\>\<\/div\>/g, "\n")
+        charPos = pageContent.innerHTML.length;
+        try{
+            setCursor(charPos, pageContent);
+        }catch(e){
+
+        }
     }
-    if (document.querySelector('.shortcut-menu')) {
-        document.querySelector('.shortcut-menu').remove();
-    }
-    pageContent.innerHTML.replaceAll('<br>', '\n');
 
 }
 addFileBtn.addEventListener('click', (e) => {
@@ -633,25 +662,6 @@ document.addEventListener('keydown', e => {
     }
 });
 
-// shareBtn.addEventListener('click', (e) => {
-//     if (!navigator.clipboard) {
-//         alert('Votre navigateur ne supporte pas le copier/coller');
-//         return
-//     }
-//     navigator.clipboard.writeText("http://localhost:3000/share/" + fileToken+"/"+shareToken)
-//         .then(() => {
-//             shareBtn.style.color="green";
-//             shareBtn.innerText="lien copié";
-//             setTimeout(()=>{
-//                 shareBtn.style.color="black";
-//                 shareBtn.innerText="Partager";
-//             },2000);
-//     })
-//         .catch(err => {
-//         console.log('Something went wrong', err);
-//     }) 
-// });
-
 backupBtn.addEventListener('click', (e) => {
     if(document.querySelector('.qrcode').classList.contains('active')){
         document.querySelector('.qrcode').classList.remove('active')
@@ -667,8 +677,19 @@ closeFileManager.addEventListener('click', (e) => {
     if(fileManager.classList.contains('close')){
         fileManager.classList.remove('close')
         closeFileManager.style.backgroundImage = "url('http://localhost:3000/image/close.png')";
+        localStorage.setItem('filemanager-state', 1);
+        pageHeader.classList.remove('active');
+        pageFooter.classList.remove('active');
     }else{
         fileManager.classList.add('close')
         closeFileManager.style.backgroundImage = "url('http://localhost:3000/image/rightarrow.png')";
+        localStorage.setItem('filemanager-state', 0);
+        pageHeader.classList.add('active');
+        pageFooter.classList.add('active');
     }
 });
+
+function updateCounter(){
+    nbrChars.innerText = pageContent.innerHTML.length + " caractère"+(pageContent.innerHTML.length > 1 ? "s" : "");
+    nbrWord.innerText = pageContent.innerHTML.split(" ").length-1 + " mot"+(pageContent.innerHTML.split(" ").length-1 > 1 ? "s" : "");
+}

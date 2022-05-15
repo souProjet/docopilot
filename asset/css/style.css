@@ -29,11 +29,29 @@ body {
     .page-header .page-name {
         width: 100px !important;
     }
+    .page-header.active,
+    .page-footer.active {
+        width: 86% !important;
+    }
 }
 
 @media(min-width:768px) {
     .filemanager {
         width: 35%;
+    }
+    .page-header.active,
+    .page-footer.active {
+        width: 96% !important;
+    }
+    .page-header,
+    .page-footer {
+        width: 68% !important;
+    }
+}
+
+@media(max-width:768px) {
+    .page-content {
+        right: 5% !important;
     }
 }
 
@@ -41,11 +59,27 @@ body {
     .filemanager {
         width: 25%;
     }
+    .page-header.active,
+    .page-footer.active {
+        width: 98% !important;
+    }
+    .page-header,
+    .page-footer {
+        width: 76% !important;
+    }
 }
 
 @media(min-width:1200px) {
     .filemanager {
         width: 15%;
+    }
+    .page-header.active,
+    .page-footer.active {
+        width: 98% !important;
+    }
+    .page-header,
+    .page-footer {
+        width: 86% !important;
     }
 }
 
@@ -184,8 +218,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: calc(100% - 15%);
-    min-width: calc(100% - 40%);
     height: 40px;
     width: 85%;
     position: fixed;
@@ -194,6 +226,10 @@ body {
     right: 0;
     transition: all 0.5s ease-in-out;
     z-index: 20;
+}
+
+.page-header.active {
+    width: 98%;
 }
 
 .page-header .page-name,
@@ -223,18 +259,28 @@ body {
     transition: all 0.1s ease-in;
 }
 
-.page-header .page-btn .qrcode {
+.qrcode {
     position: absolute;
-    font-size: 20px;
+    text-align: center;
+    font-size: 25px;
+    font-weight: bold;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    color: white;
+    background-color: black;
     opacity: 0;
-    height: 128px;
-    width: 128px;
-    right: 10px;
+    height: 256px;
+    width: 256px;
+    top: 50%;
+    left: 50%;
+    z-index: -1;
+    transform: translate(-50%, -50%);
     transition: all 0.5s ease-in-out;
 }
 
-.page-header .page-btn .qrcode.active {
+.qrcode.active {
     opacity: 1;
+    z-index: 100;
     transition: all 0.5s ease-in-out;
 }
 
@@ -261,9 +307,7 @@ body {
 
 .page-footer {
     background-color: #fafafa;
-    max-width: calc(100% - 15%);
-    min-width: calc(100% - 40%);
-    height: 20px;
+    height: 40px;
     position: fixed;
     bottom: 0;
     width: 85%;
@@ -271,6 +315,30 @@ body {
     transition: all 0.5s ease-in-out;
     opacity: 0;
     z-index: 20;
+    display: flex;
+    justify-content: space-evenly;
+    flex-direction: row;
+    align-items: center;
+    align-content: center;
+}
+
+.page-footer.active {
+    width: 98%;
+}
+
+.page-footer span {
+    text-align: center;
+    width: 33.33%;
+    color: gray;
+    height: 100%;
+}
+
+.page-footer span.logo img {
+    position: absolute;
+    transform: translateX(-50%);
+    height: 80%;
+    width: auto;
+    top: 10%;
 }
 
 .page::-webkit-scrollbar,
